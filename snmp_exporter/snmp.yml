@@ -1,0 +1,27 @@
+auths:
+  public_v2:
+    community: public
+    version: 2
+
+modules:
+  snmp:
+    auth: public_v2
+    walk: []  # Adjust this based on your specific OIDs
+    targets:
+      - switch1:
+          address: # switch1_ip
+          labels:
+            alias: "Switch 1"
+      - switch2:
+          address: # switch2_ip
+          labels:
+            alias: "Switch 2"
+      - switch3:
+          address: # switch3_ip
+          labels:
+            alias: "Switch3"
+      - router:
+          address: # router_ip
+          labels:
+            alias: "Router"
+
