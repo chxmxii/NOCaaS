@@ -1,0 +1,67 @@
+version: '3'
+services:
+#Prometheus
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prom_data:/prometheus
+#ALERTMANAGER
+  alertmanager:
+    image: prom/alertmanager:v0.23.0
+    restart: unless-stopped
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./alertmanager:/config
+      - alertmanager-data:/data
+    command: --config.file=/config/alertmanager.yml --log.level=debug
+
+#GRAFANA
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=grafana
+    volumes:
+      - ./grafana:/etc/grafana/provisioning/datasources
+#LOKI
+  loki:
+    image: grafana/loki:2.5.0
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./grafana/loki-config.yaml:/etc/loki/local-config.yaml
+    command: -config.file=/etc/loki/local-config.yaml
+#promtail
+  promtail:
+    image: grafana/promtail:2.5.0
+    volumes:
+      - /var/log:/var/log
+      - ./grafana/promtail-config.yaml:/etc/promtail/config.yml
+    command: -config.file=/etc/promtail/config.yml
+#SNMP_EXPORTER
+  snmp_exporter:
+    image: prom/snmp-exporter
+    container_name: snmp-exporter
+    ports:
+      - "9116:9116"
+    restart: always
+    volumes:
+      - ./snmp_exporter/:/etc/snmp_exporter
+    command: ["--config.file=/etc/snmp_exporter/snmp.yml"]
+
+volumes:
+  prom_data:
+  alertmanager-data:
+
